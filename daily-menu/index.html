@@ -154,10 +154,11 @@
     display: flex;
     gap: 8px;
     align-items: end;
+    flex-wrap: wrap;
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
   }
-  .bar label { flex: 0 0 11rem; display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
-  .bar .primary { flex: 1; }
+  .bar label { flex: 1 1 9rem; display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+  .bar .primary { flex: 2 1 10rem; }
   .help { color: var(--muted); font-size: 0.92rem; display: grid; gap: 6px; margin-top: 8px; }
 </style>
 </head>
@@ -166,17 +167,18 @@
   <header>
     <h1>日常菜单</h1>
     <p class="lede">未停用的菜按最久没做排在前面。勾选今天要做的，确认后才记一笔。</p>
-    <div class="row">
-      <button type="button" id="export">导出</button>
-      <button type="button" id="import-btn">导入</button>
-      <input id="import-file" type="file" accept="application/json,.json" hidden>
-    </div>
     <p id="status" role="status"></p>
+    <p id="sync" class="note"></p>
     <details>
-      <summary>换到另一台手机或电脑</summary>
-      <div class="help">
-        <p>菜谱存在这台浏览器里，不在 HTML 文件里。换设备时：先导出 JSON，把 JSON 和这个 HTML 一起拷过去，用浏览器打开 HTML，再导入。导入会整份替换那台浏览器里的数据。</p>
-      </div>
+      <summary>同步设置（GitHub）</summary>
+      <form id="gh-form" class="stack" style="margin-top:8px">
+        <input id="gh-repo" placeholder="数据仓库，例如 TommyDeng/menu-data" autocomplete="off" required>
+        <input id="gh-token" type="password" placeholder="访问令牌（只存在这台设备）" autocomplete="off">
+        <div class="row">
+          <button class="primary" type="submit">保存并连接</button>
+          <button type="button" id="gh-off">断开</button>
+        </div>
+      </form>
     </details>
   </header>
 
@@ -292,7 +294,11 @@ function setStatus(text) {
 }
 
 function load() {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  let raw = null;
+  try { raw = localStorage.getItem(STORAGE_KEY); } catch (err) {
+    setStatus("这个浏览器不让存数据，改动不会保留。");
+    return;
+  }
   if (!raw) return;
   try {
     const data = JSON.parse(raw);
@@ -306,16 +312,196 @@ function load() {
 }
 
 function save() {
-  if (storageLocked) {
+  if (!storageLocked) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, dishes: state.dishes, records: state.records }));
+    } catch (err) {
+      if (!col) setStatus("这台浏览器没有把菜单存下来。" + err.message);
+    }
+  } else if (!col) {
     setStatus("旧数据读不出来，没有写入。");
-    return;
   }
+  push();
+}
+
+// ---- GitHub 同步：数据存在一个仓库的 menu.json 里 ----
+const GH_KEY = "daily-menu-gh";
+const GH_FILE = "menu.json";
+const SYNC_OK = "已同步到 GitHub，别的设备打开页面就能看到。";
+const SYNC_LOCAL = "数据只保存在这台设备的浏览器里，不会同步到其他设备。";
+let col = null;            // 配置好同步后是 {repo, token}
+let ghSha = null, pushTimer = 0, busy = false, dirty = false;
+
+function setSync(text) { $("#sync").textContent = text; }
+
+function ghCfg() {
+  try {
+    const c = JSON.parse(localStorage.getItem(GH_KEY) || "null");
+    return c && c.repo && c.token ? c : null;
+  } catch (err) { return null; }
+}
+
+function ghFetch(method, body) {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    Authorization: "Bearer " + col.token,
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
+  if (body) headers["Content-Type"] = "application/json";
+  return fetch("https://api.github.com/repos/" + col.repo + "/contents/" + GH_FILE, {
+    method, headers, cache: "no-store", body: body ? JSON.stringify(body) : undefined
+  });
+}
+
+function ghError(res) {
+  if (res.status === 401) return "令牌无效或已过期";
+  if (res.status === 403) return "没有权限或请求太频繁";
+  return "GitHub 返回 " + res.status;
+}
+
+function b64enc(text) {
+  let bin = "";
+  new TextEncoder().encode(text).forEach((b) => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+
+function b64dec(b64) {
+  const bin = atob(b64.replace(/\s/g, ""));
+  return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+}
+
+function applyRemote(p) {
+  state = { dishes: p.dishes, records: p.records };
+  for (const id of [...checked]) if (!dishById(id)) checked.delete(id);
+  if (editingId && !dishById(editingId)) editingId = null;
+  if (editingId) { renderDisabled(); renderHistory(); renderBackfill(); } else renderDishViews();
+  updateBar();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, dishes: state.dishes, records: state.records }));
+  } catch (err) { /* 本机缓存失败不影响同步 */ }
+}
+
+async function pull() {
+  if (!col || busy) return;
+  busy = true;
+  try {
+    const res = await ghFetch("GET");
+    if (res.status === 404) {
+      ghSha = null;                                   // 仓库里还没有数据文件
+      if (state.dishes.length || state.records.length) dirty = true;
+      setSync(SYNC_OK);
+    } else if (!res.ok) {
+      throw new Error(ghError(res));
+    } else {
+      const j = await res.json();
+      ghSha = j.sha;
+      const p = normalizePayload(JSON.parse(b64dec(j.content)));
+      if (p.error) throw new Error("数据文件格式不对：" + p.error);
+      if (!dirty) applyRemote(p);                     // 本机有没上传的改动时，不覆盖
+      setSync(SYNC_OK);
+    }
   } catch (err) {
-    setStatus("这台浏览器没有把菜单存下来。" + err.message);
+    setSync("同步失败：" + err.message + "。先用本机数据，稍后重试。");
+  } finally {
+    busy = false;
+    if (dirty) flush();
   }
 }
+
+async function flush() {
+  if (!col || busy || !dirty) return;
+  busy = true;
+  dirty = false;
+  let conflict = false;
+  try {
+    const body = {
+      message: "update menu",
+      content: b64enc(JSON.stringify({ version: 1, dishes: state.dishes, records: state.records }, null, 1))
+    };
+    if (ghSha) body.sha = ghSha;
+    const res = await ghFetch("PUT", body);
+    if (res.status === 409 || res.status === 422) {
+      conflict = true;
+    } else if (!res.ok) {
+      throw new Error(ghError(res));
+    } else {
+      ghSha = (await res.json()).content.sha;
+      setSync(SYNC_OK);
+    }
+  } catch (err) {
+    dirty = true;
+    setSync("同步失败：" + err.message + "。改动还在这台设备上，下次操作会重试。");
+  } finally {
+    busy = false;
+  }
+  if (conflict) {
+    await pull();
+    setStatus("别的设备刚改过，已刷新成最新。刚才那次操作没有保存，请再做一次。");
+  }
+}
+
+function push() {
+  if (!col) return;
+  dirty = true;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(flush, 700);
+}
+
+function startSync() {
+  const cfg = ghCfg();
+  if (cfg) {
+    $("#gh-repo").value = cfg.repo;
+    $("#gh-token").placeholder = "令牌已保存，不用重填";
+    col = cfg;
+    setSync("正在同步…");
+    pull();
+  } else {
+    setSync(SYNC_LOCAL);
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+}
+
+$("#gh-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const repo = $("#gh-repo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "");
+  const old = ghCfg();
+  const token = $("#gh-token").value.trim() || (old ? old.token : "");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) return setStatus("仓库写成 用户名/仓库名，并填上令牌。");
+  setStatus("正在检查…");
+  let info;
+  try {
+    const res = await fetch("https://api.github.com/repos/" + repo, {
+      headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + token }
+    });
+    if (!res.ok) return setStatus(res.status === 401 ? "令牌无效或已过期。" : "访问不了这个仓库，检查仓库名和令牌权限。");
+    info = await res.json();
+  } catch (err) {
+    return setStatus("连不上 GitHub：" + err.message);
+  }
+  if (info.permissions && !info.permissions.push) return setStatus("这个令牌没有写入权限，需要 Contents 的读写。");
+  try {
+    localStorage.setItem(GH_KEY, JSON.stringify({ repo, token }));
+  } catch (err) {
+    return setStatus("这台浏览器没法保存同步设置。");
+  }
+  col = { repo, token };
+  ghSha = null;
+  $("#gh-token").value = "";
+  $("#gh-token").placeholder = "令牌已保存，不用重填";
+  setStatus(info.private ? "已连接。" : "已连接，但这个仓库是公开的，菜单数据所有人都能看到。");
+  setSync("正在同步…");
+  pull();
+});
+
+$("#gh-off").addEventListener("click", () => {
+  try { localStorage.removeItem(GH_KEY); } catch (err) { /* 忽略 */ }
+  col = null;
+  clearTimeout(pushTimer);
+  dirty = false;
+  $("#gh-token").placeholder = "访问令牌（只存在这台设备）";
+  setSync(SYNC_LOCAL);
+  setStatus("已断开同步，数据继续保存在本机。");
+});
 
 function normalizePayload(data) {
   if (!data || typeof data !== "object" || !Array.isArray(data.dishes) || !Array.isArray(data.records)) {
@@ -469,7 +655,6 @@ function renderActiveRow(dish) {
     if (input.checked) checked.add(dish.id);
     else checked.delete(dish.id);
     updateBar();
-    renderActive();
   });
   const editBtn = el("button", { type: "button", class: "small" }, ["编辑"]);
   editBtn.addEventListener("click", () => {
@@ -713,23 +898,6 @@ function addDish(name, note, date) {
   return "";
 }
 
-function exportData() {
-  const payload = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    dishes: state.dishes,
-    records: state.records
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "daily-menu-" + today() + ".json";
-  a.click();
-  URL.revokeObjectURL(url);
-  setStatus("已导出。换设备时带上这个 JSON，不要只拷 HTML。");
-}
-
 $("#add-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(event.currentTarget);
@@ -760,7 +928,7 @@ $("#bulk-add").addEventListener("click", () => {
 });
 
 $("#filter").addEventListener("input", () => {
-  renderActive();
+  if (!editingId) renderActive();
   renderDisabled();
 });
 
@@ -807,57 +975,36 @@ $("#backfill").addEventListener("submit", (event) => {
   setStatus("已补记「" + dishName(dishId) + "」。");
 });
 
-$("#export").addEventListener("click", exportData);
-
-$("#import-btn").addEventListener("click", () => $("#import-file").click());
-
-$("#import-file").addEventListener("change", async (event) => {
-  const input = event.currentTarget;
-  const file = input.files && input.files[0];
-  if (!file) return;
-  if (file.size > 2 * 1024 * 1024) {
-    input.value = "";
-    return setStatus("文件太大。");
-  }
-  let text;
-  try {
-    text = await file.text();
-  } catch {
-    input.value = "";
-    return setStatus("文件读不出来。");
-  }
-  input.value = "";
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    return setStatus("这个文件不是 JSON。");
-  }
-  const parsed = normalizePayload(data);
-  if (parsed.error) return setStatus("没有导入。" + parsed.error);
-  const ok = confirm(
-    "导入会替换这台浏览器里的全部菜品和记录。\n当前 " +
-    state.dishes.length + " 道菜、" + state.records.length + " 条记录。\n文件里 " +
-    parsed.dishes.length + " 道菜、" + parsed.records.length + " 条记录。\n建议先导出。确定替换？"
-  );
-  if (!ok) return setStatus("已取消导入。");
-  state = { dishes: parsed.dishes, records: parsed.records };
-  checked.clear();
-  editingId = null;
-  pendingDeleteRecordId = null;
-  save();
-  renderDishViews();
-  updateBar();
-  setStatus("已导入 " + state.dishes.length + " 道菜、" + state.records.length + " 条记录。");
-});
-
 $("#use-date").value = today();
 $("#use-date").max = today();
 $("#backfill-date").value = today();
 $("#add-form").querySelector("[name=last]").max = today();
+let day = today();
+function checkDay() {
+  const t = today();
+  if (t === day) return;
+  const use = $("#use-date");
+  if (use.value === day) use.value = t;
+  day = t;
+  $("#backfill-date").max = t;
+  $("#add-form").querySelector("[name=last]").max = t;
+  renderDishViews();
+  updateBar();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkDay(); });
+setInterval(checkDay, 60000);
+window.addEventListener("storage", (e) => {
+  if (e.key !== STORAGE_KEY || col) return;
+  load();
+  renderDishViews();
+  updateBar();
+});
+
+setSync(SYNC_LOCAL);
 load();
 renderDishViews();
 updateBar();
+startSync();
 </script>
 </body>
 </html>
