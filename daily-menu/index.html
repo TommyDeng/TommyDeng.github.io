@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>日常菜单</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3efe6;
+    --surface: #fffdf8;
+    --ink: #221e18;
+    --muted: #6f675c;
+    --line: #e4dccb;
+    --accent: #9d3418;
+    --accent-ink: #fffaf6;
+    --never: #9d3418;
+    --today: #246246;
+    --shadow: 0 8px 24px rgba(48, 32, 12, 0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #16130f;
+      --surface: #221e19;
+      --ink: #f3efe6;
+      --muted: #b3aa9e;
+      --line: #3a332b;
+      --accent: #e07a55;
+      --accent-ink: #1a100c;
+      --never: #f0a080;
+      --today: #8dceab;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.45 system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  }
+  main {
+    width: min(40rem, 100%);
+    margin: 0 auto;
+    padding: 20px 16px 128px;
+  }
+  h1, h2 { font-weight: 650; letter-spacing: 0; }
+  h1 { margin: 0 0 6px; font-size: 1.7rem; }
+  h2 { margin: 0; font-size: 1.05rem; }
+  p { margin: 0; }
+  .lede { color: var(--muted); margin-bottom: 14px; }
+  header { margin-bottom: 18px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button, input, select, textarea {
+    font: inherit;
+    color: inherit;
+  }
+  input, select, textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  textarea { min-height: 7rem; resize: vertical; }
+  button {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: transparent;
+  }
+  button.danger { color: var(--accent); }
+  button.small { min-height: 36px; padding: 0 10px; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  #status {
+    min-height: 1.45em;
+    color: var(--muted);
+    margin: 8px 0 0;
+  }
+  section {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    margin: 12px 0;
+    box-shadow: var(--shadow);
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .section-head input { max-width: 11rem; }
+  form.stack, .stack { display: grid; gap: 8px; }
+  .split { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 520px) {
+    .split { grid-template-columns: 1fr; }
+  }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--muted); }
+  .dish, .record, .quiet {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 2px;
+    border-top: 1px solid var(--line);
+  }
+  .quiet { color: var(--muted); display: block; }
+  .check { display: flex; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
+  .check input { width: 1.25rem; height: 1.25rem; margin-top: 3px; accent-color: var(--accent); }
+  .body { flex: 1; min-width: 0; }
+  .name { font-weight: 650; overflow-wrap: anywhere; }
+  .check .body, .dish > .body { display: flex; flex-direction: column; gap: 2px; }
+  label.field { display: grid; gap: 4px; color: var(--muted); font-size: 0.92rem; }
+  .note, .meta { color: var(--muted); font-size: 0.92rem; }
+  .meta.never { color: var(--never); }
+  .meta.today { color: var(--today); }
+  .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .edit-grid { display: grid; gap: 8px; }
+  .history-day { margin-top: 12px; }
+  .history-day h3 { margin: 0; font-size: 0.95rem; font-weight: 650; }
+  .record { flex-wrap: wrap; }
+  .record .body { padding-top: 6px; }
+  .record input[type="date"] { width: auto; min-height: 36px; flex: 1 1 10rem; }
+  .bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+  }
+  .bar-inner {
+    width: min(40rem, 100%);
+    margin: 0 auto;
+    display: flex;
+    gap: 8px;
+    align-items: end;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  }
+  .bar label { flex: 0 0 11rem; display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+  .bar .primary { flex: 1; }
+  .help { color: var(--muted); font-size: 0.92rem; display: grid; gap: 6px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>日常菜单</h1>
+    <p class="lede">未停用的菜按最久没做排在前面。勾选今天要做的，确认后才记一笔。</p>
+    <div class="row">
+      <button type="button" id="export">导出</button>
+      <button type="button" id="import-btn">导入</button>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+    </div>
+    <p id="status" role="status"></p>
+    <details>
+      <summary>换到另一台手机或电脑</summary>
+      <div class="help">
+        <p>菜谱存在这台浏览器里，不在 HTML 文件里。换设备时：先导出 JSON，把 JSON 和这个 HTML 一起拷过去，用浏览器打开 HTML，再导入。导入会整份替换那台浏览器里的数据。</p>
+      </div>
+    </details>
+  </header>
+
+  <section>
+    <h2>添加</h2>
+    <form id="add-form" class="stack" style="margin-top:10px">
+      <input name="name" maxlength="40" placeholder="菜名" autocomplete="off" required>
+      <input name="note" maxlength="80" placeholder="备注，可选" autocomplete="off">
+      <label class="field">上次做过，可空
+        <input name="last" type="date">
+      </label>
+      <button class="primary" type="submit">添加</button>
+    </form>
+    <details>
+      <summary>一次加多道</summary>
+      <div class="stack" style="margin-top:8px">
+        <textarea id="bulk" placeholder="一行一个菜名"></textarea>
+        <button type="button" id="bulk-add">添加这些</button>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2 id="active-title">推荐</h2>
+      <input id="filter" placeholder="筛选菜名" autocomplete="off">
+    </div>
+    <div id="active"></div>
+  </section>
+
+  <section id="disabled-section" hidden>
+    <h2>已停用</h2>
+    <div id="disabled"></div>
+  </section>
+
+  <section>
+    <h2>使用记录</h2>
+    <form id="backfill" class="stack" style="margin-top:10px">
+      <div class="split">
+        <select id="backfill-dish" required>
+          <option value="">选择菜</option>
+        </select>
+        <input id="backfill-date" type="date" required>
+      </div>
+      <button type="submit">补记</button>
+    </form>
+    <div id="history"></div>
+  </section>
+</main>
+
+<div class="bar">
+  <div class="bar-inner">
+    <label>使用日期
+      <input id="use-date" type="date" required>
+    </label>
+    <button type="button" id="clear-checks" class="small" hidden>清空</button>
+    <button type="button" id="confirm" class="primary" disabled>先勾选要做的菜</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "daily-menu-v1";
+
+let state = { dishes: [], records: [] };
+let storageLocked = false;
+let stamp = 0;
+
+function timestamp() {
+  const now = Date.now();
+  stamp = Math.max(stamp + 1, now);
+  return new Date(stamp).toISOString();
+}
+const checked = new Set();
+let editingId = null;
+let pendingDeleteRecordId = null;
+let armTimer = 0;
+
+const $ = (sel) => document.querySelector(sel);
+
+function uid() {
+  try {
+    if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  } catch (err) { /* file:// 下有的浏览器不给用 */ }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function today() {
+  const d = new Date();
+  const z = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate());
+}
+
+function isValidDate(iso) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+}
+
+function isFuture(iso) {
+  return iso > today();
+}
+
+function normalizeName(value) {
+  return String(value || "").normalize("NFC").replace(/\u3000/g, " ").trim().replace(/\s+/g, " ");
+}
+
+function setStatus(text) {
+  $("#status").textContent = text || "";
+}
+
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    const parsed = normalizePayload(data);
+    if (parsed.error) throw new Error(parsed.error);
+    state = { dishes: parsed.dishes, records: parsed.records };
+  } catch (err) {
+    storageLocked = true;
+    setStatus("这台浏览器里的菜单读不出来，已停止写入，原数据还在。" + err.message);
+  }
+}
+
+function save() {
+  if (storageLocked) {
+    setStatus("旧数据读不出来，没有写入。");
+    return;
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, dishes: state.dishes, records: state.records }));
+  } catch (err) {
+    setStatus("这台浏览器没有把菜单存下来。" + err.message);
+  }
+}
+
+function normalizePayload(data) {
+  if (!data || typeof data !== "object" || !Array.isArray(data.dishes) || !Array.isArray(data.records)) {
+    return { error: "文件里没有菜品和记录。" };
+  }
+  const ids = new Set();
+  const names = new Set();
+  const dishes = [];
+  data.dishes.forEach((d, i) => {
+    if (!d || typeof d !== "object") return;
+    const id = typeof d.id === "string" && d.id ? d.id : "";
+    const name = normalizeName(d.name);
+    if (!id || !name) return;
+    if (ids.has(id) || names.has(name) || name.length > 40) return;
+    ids.add(id);
+    names.add(name);
+    const createdAt = typeof d.createdAt === "string" && d.createdAt
+      ? d.createdAt
+      : new Date(Date.now() + i).toISOString();
+    dishes.push({
+      id,
+      name,
+      note: String(d.note || "").trim().slice(0, 80),
+      disabled: Boolean(d.disabled),
+      createdAt
+    });
+  });
+  if (dishes.length !== data.dishes.length) return { error: "有菜名空了、太长、重复，或缺少 id。" };
+
+  const recordIds = new Set();
+  const pairs = new Set();
+  const records = [];
+  for (const r of data.records) {
+    if (!r || typeof r.id !== "string" || !r.id) return { error: "有记录缺少 id。" };
+    if (recordIds.has(r.id)) return { error: "记录 id 重复。" };
+    if (!ids.has(r.dishId)) return { error: "有记录指向不存在的菜。" };
+    if (!isValidDate(r.date) || isFuture(r.date)) return { error: "有记录的日期不对，或在未来。" };
+    const pair = r.dishId + "|" + r.date;
+    if (pairs.has(pair)) return { error: "同一道菜在同一天有重复记录。" };
+    recordIds.add(r.id);
+    pairs.add(pair);
+    records.push({ id: r.id, dishId: r.dishId, date: r.date });
+  }
+  return { dishes, records };
+}
+
+function findByName(name, exceptId) {
+  return state.dishes.find((d) => d.name === name && d.id !== exceptId);
+}
+
+function dishById(id) {
+  return state.dishes.find((d) => d.id === id);
+}
+
+function lastUsed(dishId) {
+  let last = null;
+  for (const r of state.records) {
+    if (r.dishId === dishId && (last === null || r.date > last)) last = r.date;
+  }
+  return last;
+}
+
+function hasRecord(dishId, date) {
+  return state.records.some((r) => r.dishId === dishId && r.date === date);
+}
+
+function compareActive(a, b) {
+  const la = lastUsed(a.id);
+  const lb = lastUsed(b.id);
+  if (la === null && lb !== null) return -1;
+  if (la !== null && lb === null) return 1;
+  if (la === null && lb === null && a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1;
+  if (la !== lb) return la < lb ? -1 : 1;
+  return a.name.localeCompare(b.name, "zh");
+}
+
+function daysAgo(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const [ty, tm, td] = today().split("-").map(Number);
+  const a = new Date(y, m - 1, d);
+  const b = new Date(ty, tm - 1, td);
+  return Math.round((b - a) / 86400000);
+}
+
+function formatDay(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const nowY = Number(today().slice(0, 4));
+  return y === nowY ? m + "月" + d + "日" : y + "年" + m + "月" + d + "日";
+}
+
+function whenLabel(iso) {
+  if (!iso) return { text: "从未", kind: "never" };
+  const n = daysAgo(iso);
+  const when = n === 0 ? "今天" : n === 1 ? "昨天" : n + "天前";
+  return { text: formatDay(iso) + " · " + when, kind: n === 0 ? "today" : "" };
+}
+
+function el(tag, attrs, children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs || {})) {
+    if (value == null || value === false) continue;
+    if (key === "class") node.className = value;
+    else node.setAttribute(key, value === true ? "" : String(value));
+  }
+  for (const child of children || []) {
+    if (child == null || child === false) continue;
+    node.append(child.nodeType ? child : document.createTextNode(String(child)));
+  }
+  return node;
+}
+
+function queryText() {
+  return $("#filter").value.trim().toLowerCase();
+}
+
+function matches(dish, q) {
+  if (!q) return true;
+  return (dish.name + " " + dish.note).toLowerCase().includes(q);
+}
+
+function renderActive() {
+  const q = queryText();
+  const dishes = state.dishes.filter((d) => !d.disabled).sort(compareActive);
+  const visible = dishes.filter((d) => matches(d, q));
+  const hiddenChecked = [...checked].filter((id) => {
+    const dish = dishById(id);
+    return dish && !dish.disabled && !matches(dish, q);
+  }).length;
+  $("#active-title").textContent = "推荐 · " + dishes.length;
+  const box = $("#active");
+  box.replaceChildren();
+  if (!dishes.length) {
+    box.append(el("p", { class: "quiet" }, [state.dishes.length ? "在用的菜都停用了。" : "还没有菜。先在上面加。"]));
+    return;
+  }
+  if (!visible.length) box.append(el("p", { class: "quiet" }, ["没有匹配的菜。"]));
+  for (const dish of visible) {
+    if (editingId === dish.id) box.append(renderEditor(dish));
+    else box.append(renderActiveRow(dish));
+  }
+  if (hiddenChecked) {
+    box.append(el("p", { class: "quiet" }, ["另有 " + hiddenChecked + " 道已勾选，被筛选藏起来了。确认时仍会计入。"]));
+  }
+}
+
+function renderActiveRow(dish) {
+  const meta = whenLabel(lastUsed(dish.id));
+  const input = el("input", { type: "checkbox" });
+  input.checked = checked.has(dish.id);
+  input.addEventListener("change", () => {
+    if (input.checked) checked.add(dish.id);
+    else checked.delete(dish.id);
+    updateBar();
+    renderActive();
+  });
+  const editBtn = el("button", { type: "button", class: "small" }, ["编辑"]);
+  editBtn.addEventListener("click", () => {
+    checked.delete(dish.id);
+    editingId = dish.id;
+    renderActive();
+    updateBar();
+  });
+  const disableBtn = el("button", { type: "button", class: "small" }, ["停用"]);
+  disableBtn.addEventListener("click", () => {
+    dish.disabled = true;
+    checked.delete(dish.id);
+    editingId = null;
+    save();
+    renderDishViews();
+    updateBar();
+    setStatus("已停用「" + dish.name + "」。它不再出现在推荐里。");
+  });
+  return el("div", { class: "dish" }, [
+    el("label", { class: "check" }, [
+      input,
+      el("span", { class: "body" }, [
+        el("span", { class: "name" }, [dish.name]),
+        dish.note ? el("span", { class: "note" }, [dish.note]) : null,
+        el("span", { class: "meta " + meta.kind }, [meta.text])
+      ].filter(Boolean))
+    ]),
+    el("span", { class: "actions" }, [editBtn, disableBtn])
+  ]);
+}
+
+function renderEditor(dish) {
+  const name = el("input", { maxlength: "40", value: dish.name, "aria-label": "菜名" });
+  const note = el("input", { maxlength: "80", value: dish.note, "aria-label": "备注", placeholder: "备注，可选" });
+  const saveBtn = el("button", { type: "button", class: "small primary" }, ["保存"]);
+  const cancelBtn = el("button", { type: "button", class: "small" }, ["取消"]);
+  const deleteBtn = el("button", { type: "button", class: "small danger" }, ["删除"]);
+  const saveEdit = () => {
+    const nextName = normalizeName(name.value);
+    const nextNote = note.value.trim();
+    if (!nextName) return setStatus("菜名不能空。");
+    if (nextName.length > 40) return setStatus("菜名太长。");
+    if (nextNote.length > 80) return setStatus("备注太长。");
+    if (findByName(nextName, dish.id)) return setStatus("已经有「" + nextName + "」。");
+    dish.name = nextName;
+    dish.note = nextNote;
+    editingId = null;
+    save();
+    renderDishViews();
+    setStatus("已保存「" + nextName + "」。");
+  };
+  saveBtn.addEventListener("click", saveEdit);
+  name.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") saveEdit();
+  });
+  note.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") saveEdit();
+  });
+  cancelBtn.addEventListener("click", () => {
+    editingId = null;
+    renderActive();
+  });
+  deleteBtn.addEventListener("click", () => deleteDish(dish));
+  return el("div", { class: "dish" }, [
+    el("div", { class: "edit-grid body" }, [
+      name,
+      note,
+      el("span", { class: "actions" }, [saveBtn, cancelBtn, deleteBtn])
+    ])
+  ]);
+}
+
+function renderDisabled() {
+  const section = $("#disabled-section");
+  const dishes = state.dishes.filter((d) => d.disabled).sort((a, b) => a.name.localeCompare(b.name, "zh"));
+  section.hidden = dishes.length === 0;
+  const q = queryText();
+  const visible = dishes.filter((d) => matches(d, q));
+  const box = $("#disabled");
+  box.replaceChildren();
+  if (!dishes.length) return;
+  if (!visible.length) box.append(el("p", { class: "quiet" }, ["没有匹配的停用菜。"]));
+  for (const dish of visible) {
+    const restoreBtn = el("button", { type: "button", class: "small" }, ["恢复"]);
+    const deleteBtn = el("button", { type: "button", class: "small danger" }, ["删除"]);
+    restoreBtn.addEventListener("click", () => {
+      dish.disabled = false;
+      save();
+      renderDishViews();
+      setStatus("已恢复「" + dish.name + "」。");
+    });
+    deleteBtn.addEventListener("click", () => deleteDish(dish));
+    const meta = whenLabel(lastUsed(dish.id));
+    box.append(el("div", { class: "dish" }, [
+      el("span", { class: "body" }, [
+        el("span", { class: "name" }, [dish.name]),
+        dish.note ? el("span", { class: "note" }, [dish.note]) : null,
+        el("span", { class: "meta" }, [meta.text])
+      ].filter(Boolean)),
+      el("span", { class: "actions" }, [restoreBtn, deleteBtn])
+    ]));
+  }
+}
+
+function deleteDish(dish) {
+  const n = state.records.filter((r) => r.dishId === dish.id).length;
+  const message = n
+    ? "删除「" + dish.name + "」？这道菜的 " + n + " 条使用记录也会一起删掉。"
+    : "删除「" + dish.name + "」？";
+  if (!confirm(message)) return;
+  state.dishes = state.dishes.filter((d) => d.id !== dish.id);
+  state.records = state.records.filter((r) => r.dishId !== dish.id);
+  checked.delete(dish.id);
+  if (editingId === dish.id) editingId = null;
+  save();
+  renderDishViews();
+  updateBar();
+  setStatus("已删除「" + dish.name + "」。");
+}
+
+function renderHistory() {
+  const box = $("#history");
+  box.replaceChildren();
+  if (!state.records.length) {
+    box.append(el("p", { class: "quiet" }, ["还没有使用记录。"]));
+    return;
+  }
+  const byDate = new Map();
+  const sorted = [...state.records].sort((a, b) => b.date.localeCompare(a.date) || dishName(a.dishId).localeCompare(dishName(b.dishId), "zh"));
+  for (const record of sorted) {
+    if (!byDate.has(record.date)) byDate.set(record.date, []);
+    byDate.get(record.date).push(record);
+  }
+  for (const [date, records] of byDate) {
+    const ago = daysAgo(date);
+    const when = ago === 0 ? " · 今天" : ago === 1 ? " · 昨天" : " · " + ago + "天前";
+    const group = el("div", { class: "history-day" }, [el("h3", {}, [formatDay(date) + when])]);
+    for (const record of records) group.append(renderRecord(record));
+    box.append(group);
+  }
+}
+
+function dishName(id) {
+  const dish = dishById(id);
+  return dish ? dish.name : "已删除的菜";
+}
+
+function renderRecord(record) {
+  const date = el("input", { type: "date", max: today(), value: record.date, "aria-label": dishName(record.dishId) + "的使用日期" });
+  date.addEventListener("change", () => {
+    const next = date.value;
+    if (!isValidDate(next) || isFuture(next)) {
+      setStatus("日期不对，也不能记未来。");
+      renderHistory();
+      return;
+    }
+    if (state.records.some((r) => r.id !== record.id && r.dishId === record.dishId && r.date === next)) {
+      setStatus("这道菜在这天已经有记录。");
+      renderHistory();
+      return;
+    }
+    record.date = next;
+    save();
+    renderDishViews();
+    setStatus("已改「" + dishName(record.dishId) + "」的使用日期。");
+  });
+  const armed = pendingDeleteRecordId === record.id;
+  const deleteBtn = el("button", { type: "button", class: "small danger" }, [armed ? "确认删除" : "删除"]);
+  deleteBtn.addEventListener("click", () => {
+    if (pendingDeleteRecordId !== record.id) {
+      pendingDeleteRecordId = record.id;
+      clearTimeout(armTimer);
+      armTimer = setTimeout(() => {
+        pendingDeleteRecordId = null;
+        renderHistory();
+      }, 4000);
+      renderHistory();
+      return;
+    }
+    clearTimeout(armTimer);
+    pendingDeleteRecordId = null;
+    state.records = state.records.filter((r) => r.id !== record.id);
+    save();
+    renderDishViews();
+    setStatus("已删除一条记录。排序已按剩下的最近日期重算。");
+  });
+  return el("div", { class: "record" }, [
+    el("span", { class: "body name" }, [dishName(record.dishId)]),
+    date,
+    deleteBtn
+  ]);
+}
+
+function renderBackfill() {
+  const sel = $("#backfill-dish");
+  const prev = sel.value;
+  sel.replaceChildren(el("option", { value: "" }, ["选择菜"]));
+  const dishes = [...state.dishes].sort((a, b) => a.name.localeCompare(b.name, "zh"));
+  for (const dish of dishes) {
+    sel.append(el("option", { value: dish.id }, [dish.disabled ? dish.name + "（已停用）" : dish.name]));
+  }
+  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev;
+  $("#backfill-date").max = today();
+}
+
+function renderDishViews() {
+  renderActive();
+  renderDisabled();
+  renderHistory();
+  renderBackfill();
+}
+
+function updateBar() {
+  const count = [...checked].filter((id) => {
+    const dish = dishById(id);
+    return dish && !dish.disabled;
+  }).length;
+  const button = $("#confirm");
+  button.disabled = count === 0;
+  button.textContent = count ? "确认记录 " + count + " 道" : "先勾选要做的菜";
+  $("#clear-checks").hidden = count === 0;
+  $("#use-date").max = today();
+}
+
+function addDish(name, note, date) {
+  const clean = normalizeName(name);
+  if (!clean) return "菜名不能空。";
+  if (clean.length > 40) return "菜名太长。";
+  if (note.trim().length > 80) return "备注太长。";
+  if (findByName(clean)) return "已经有「" + clean + "」。";
+  if (date && (!isValidDate(date) || isFuture(date))) return "上次做过的日期不对，也不能是未来。";
+  const dish = {
+    id: uid(),
+    name: clean,
+    note: note.trim(),
+    disabled: false,
+    createdAt: timestamp()
+  };
+  state.dishes.push(dish);
+  if (date) state.records.push({ id: uid(), dishId: dish.id, date });
+  return "";
+}
+
+function exportData() {
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    dishes: state.dishes,
+    records: state.records
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "daily-menu-" + today() + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus("已导出。换设备时带上这个 JSON，不要只拷 HTML。");
+}
+
+$("#add-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  const error = addDish(data.get("name"), data.get("note") || "", data.get("last") || "");
+  if (error) return setStatus(error);
+  event.currentTarget.reset();
+  save();
+  renderDishViews();
+  setStatus("已添加。");
+});
+
+$("#bulk-add").addEventListener("click", () => {
+  const lines = $("#bulk").value.split(/\r?\n/).map(normalizeName).filter(Boolean);
+  if (!lines.length) return setStatus("先贴上菜名，一行一个。");
+  let added = 0;
+  const skipped = [];
+  for (const name of lines) {
+    const error = addDish(name, "", "");
+    if (error) skipped.push(name);
+    else added += 1;
+  }
+  if (added) save();
+  $("#bulk").value = added ? "" : $("#bulk").value;
+  renderDishViews();
+  setStatus(skipped.length
+    ? "加了 " + added + " 道，跳过：" + skipped.slice(0, 8).join("、") + (skipped.length > 8 ? " 等" : "")
+    : "加了 " + added + " 道。");
+});
+
+$("#filter").addEventListener("input", () => {
+  renderActive();
+  renderDisabled();
+});
+
+$("#confirm").addEventListener("click", () => {
+  const date = $("#use-date").value;
+  if (!isValidDate(date) || isFuture(date)) return setStatus("先选一个今天或更早的日期。");
+  let created = 0;
+  let existed = 0;
+  for (const id of [...checked]) {
+    const dish = dishById(id);
+    if (!dish || dish.disabled) continue;
+    if (hasRecord(id, date)) {
+      existed += 1;
+      continue;
+    }
+    state.records.push({ id: uid(), dishId: id, date });
+    created += 1;
+  }
+  checked.clear();
+  if (created) save();
+  renderDishViews();
+  updateBar();
+  if (!created && !existed) setStatus("没有可记录的菜。");
+  else if (!created) setStatus("这天都已经记过了。");
+  else setStatus("已记录 " + created + " 道。" + (existed ? existed + " 道这天已有记录。" : ""));
+});
+
+$("#clear-checks").addEventListener("click", () => {
+  checked.clear();
+  renderActive();
+  updateBar();
+});
+
+$("#backfill").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const dishId = $("#backfill-dish").value;
+  const date = $("#backfill-date").value;
+  if (!dishById(dishId)) return setStatus("先选一道菜。");
+  if (!isValidDate(date) || isFuture(date)) return setStatus("补记的日期不对，也不能是未来。");
+  if (hasRecord(dishId, date)) return setStatus("这道菜在这天已经有记录。");
+  state.records.push({ id: uid(), dishId, date });
+  save();
+  renderDishViews();
+  setStatus("已补记「" + dishName(dishId) + "」。");
+});
+
+$("#export").addEventListener("click", exportData);
+
+$("#import-btn").addEventListener("click", () => $("#import-file").click());
+
+$("#import-file").addEventListener("change", async (event) => {
+  const input = event.currentTarget;
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    input.value = "";
+    return setStatus("文件太大。");
+  }
+  let text;
+  try {
+    text = await file.text();
+  } catch {
+    input.value = "";
+    return setStatus("文件读不出来。");
+  }
+  input.value = "";
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return setStatus("这个文件不是 JSON。");
+  }
+  const parsed = normalizePayload(data);
+  if (parsed.error) return setStatus("没有导入。" + parsed.error);
+  const ok = confirm(
+    "导入会替换这台浏览器里的全部菜品和记录。\n当前 " +
+    state.dishes.length + " 道菜、" + state.records.length + " 条记录。\n文件里 " +
+    parsed.dishes.length + " 道菜、" + parsed.records.length + " 条记录。\n建议先导出。确定替换？"
+  );
+  if (!ok) return setStatus("已取消导入。");
+  state = { dishes: parsed.dishes, records: parsed.records };
+  checked.clear();
+  editingId = null;
+  pendingDeleteRecordId = null;
+  save();
+  renderDishViews();
+  updateBar();
+  setStatus("已导入 " + state.dishes.length + " 道菜、" + state.records.length + " 条记录。");
+});
+
+$("#use-date").value = today();
+$("#use-date").max = today();
+$("#backfill-date").value = today();
+$("#add-form").querySelector("[name=last]").max = today();
+load();
+renderDishViews();
+updateBar();
+</script>
+</body>
+</html>
