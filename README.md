@@ -69,7 +69,12 @@ python3 -m http.server 8000
 
 ## 部署
 
-仓库根目录即发布目录，推送到 `main` 后 GitHub Pages 会自动构建：
+两个域名由不同服务提供，推送一次 `main` 会同时更新：
+
+| 域名 | 提供方 | 触发方式 |
+| --- | --- | --- |
+| <https://tommydeng.github.io/> | GitHub Pages | push 后自动构建 |
+| <https://tommydeng.org/>、<https://www.tommydeng.org/> | Cloudflare Worker `tommydeng-home` | push 后由 GitHub Actions 执行 `wrangler deploy` |
 
 ```bash
 git add -A
@@ -77,7 +82,25 @@ git commit -m "update"
 git push origin main
 ```
 
-构建状态：`gh api repos/TommyDeng/TommyDeng.github.io/pages --jq .status`
+Actions 自动部署需要仓库配置两个 Secret（Settings → Secrets and variables → Actions）：
+
+- `CLOUDFLARE_API_TOKEN` —— Cloudflare 后台创建的 API Token，权限需包含 *Workers Scripts: Edit*
+- `CLOUDFLARE_ACCOUNT_ID` —— 账号 ID
+
+未配置时工作流只输出告警并跳过部署，不会失败。也可以本地手动发布：
+
+```bash
+npx wrangler deploy
+```
+
+`wrangler.jsonc` 里 `assets.directory` 为 `.`，由 `.assetsignore` 排除 `.git`、`.github`、`.wrangler`、`wrangler.jsonc` 与 `README.md`。
+
+构建状态：
+
+```bash
+gh api repos/TommyDeng/TommyDeng.github.io/pages --jq .status   # Pages
+gh run list --workflow deploy.yml --limit 3                     # Cloudflare
+```
 
 ## 当前项目
 
