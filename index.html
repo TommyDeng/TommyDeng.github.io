@@ -1,477 +1,178 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TommyDeng</title>
-<meta name="description" content="农夫、艺术家。暂时在家呆着，摸鱼到明天。">
-<meta name="theme-color" content="#f7f5ed">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #f7f5ed;
-  --card: #fcfbf6;
-  --line: #dadfd0;
-  --ink: #293b2e;
-  --leaf: #4d6942;
-  --muted: #727a6c;
-  --emblem: #ecf0e3;
-  --sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --serif: "Noto Serif SC", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
-  --latin: "Lora", "Iowan Old Style", Palatino, "Palatino Linotype", serif;
-  color-scheme: light;
-}
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-}
-h1, h2, h3, p { margin: 0; }
-a { text-decoration: none; }
-img { border: 0; flex: none; }
-.skip {
-  position: absolute;
-  left: 16px;
-  top: 12px;
-  padding: 8px 12px;
-  background: var(--card);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  transform: translateY(-150%);
-}
-.skip:focus { transform: none; }
-
-.page {
-  width: min(1040px, calc(100% - 48px));
-  margin: 0 auto;
-}
-
-.nav {
-  height: 104px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--latin);
-  font-weight: 500;
-  font-size: 21px;
-  line-height: normal;
-  color: var(--ink);
-}
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-.nav-links a {
-  color: var(--leaf);
-  font-size: 13px;
-  line-height: normal;
-}
-.nav-links a:hover { color: var(--ink); }
-
-.intro {
-  display: flex;
-  align-items: center;
-  gap: 80px;
-  padding: 64px 0;
-}
-.intro-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.kicker {
-  color: var(--leaf);
-  font-size: 10px;
-  line-height: 12px;
-}
-.intro h1 {
-  font-family: var(--latin);
-  font-weight: 400;
-  font-size: 60px;
-  line-height: 1.12;
-  color: var(--ink);
-}
-.tagline {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-size: 32px;
-  line-height: 1.5;
-  color: var(--ink);
-}
-.bio {
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.7;
-}
-.avatar-mount {
-  flex: none;
-  width: 192px;
-  height: 148px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 7px;
-}
-.avatar {
-  display: block;
-  width: 176px;
-  height: 132px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.block {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.projects { padding-bottom: 48px; }
-.contact { padding: 8px 0 16px; }
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.section-head h2 {
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 24px;
-  line-height: 34px;
-  color: var(--ink);
-}
-.section-en {
-  color: var(--muted);
-  font-size: 10px;
-  line-height: 12px;
-  white-space: nowrap;
-}
-#projects, #contact { scroll-margin-top: 24px; }
-
-.project-list, .channel-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 26px;
-  align-items: stretch;
-}
-.project {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 28px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-}
-.project-id {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.emblem {
-  width: 40px;
-  height: 40px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--emblem);
-  border-radius: 8px;
-}
-.project h3 {
-  font-weight: 500;
-  font-size: 24px;
-  line-height: normal;
-  color: var(--ink);
-}
-.title-zh { font-family: var(--serif); }
-.title-en { font-family: var(--latin); }
-.desc {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.8;
-}
-.status {
-  min-height: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-}
-.status-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--leaf);
-  font-size: 12px;
-  line-height: 14px;
-}
-.access {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  color: inherit;
-}
-.access-top, .channel-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.access-id, .channel-id {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--leaf);
-  line-height: normal;
-}
-.access-id { font-weight: 500; font-size: 13px; line-height: 16px; }
-.access-url, .channel-detail {
-  line-height: 1.65;
-  overflow-wrap: anywhere;
-}
-.access-url {
-  color: var(--muted);
-  font-size: 12px;
-}
-.access:hover .access-id { color: var(--ink); }
-
-.channel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px;
-  background: var(--emblem);
-  border-radius: 8px;
-  color: inherit;
-}
-.channel-id { font-size: 12px; line-height: 16px; }
-.channel-detail {
-  color: var(--ink);
-  font-size: 14px;
-}
-.channel:hover { background: #e4ead8; }
-
-.site-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 24px 0 30px;
-}
-.rule {
-  height: 1px;
-  background: var(--line);
-}
-.colophon {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-top: 8px;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: normal;
-}
-.closing { font-family: var(--serif); }
-
-a:focus-visible {
-  outline: 2px solid var(--leaf);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-@media (max-width: 899px) {
-  .page { width: calc(100% - 52px); }
-  .nav { height: 80px; }
-  .brand { font-size: 18px; }
-  .nav-links { gap: 24px; }
-  .intro {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 24px;
-    padding: 36px 0 44px;
-  }
-  .avatar-mount { order: -1; width: 109px; height: 88px; }
-  .avatar { width: 93px; height: 72px; }
-  .intro-copy { gap: 12px; }
-  .intro h1 { font-size: 42px; }
-  .tagline { font-size: 25px; }
-  .bio { font-size: 14px; }
-  .project-list, .channel-list {
-    grid-template-columns: 1fr;
-  }
-  .project-list { gap: 20px; }
-  .channel-list { gap: 12px; }
-  .project { padding: 20px; }
-  .site-footer { padding-bottom: 32px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TommyDeng — 农夫、创作者</title>
+  <meta name="description" content="TommyDeng 的个人主页：最近项目与联系方式。">
+  <meta name="theme-color" content="#f7f5ed">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TommyDeng — 农夫、创作者">
+  <meta property="og:description" content="TommyDeng 的个人主页：最近项目与联系方式。">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip" href="#projects">跳到近作</a>
-<div class="page">
-  <header class="nav">
-    <div class="brand">
-      <img src="assets/sprout.svg" width="22" height="22" alt="">
-      <span>TommyDeng</span>
-    </div>
-    <nav class="nav-links" aria-label="页面">
-      <a href="#projects">近作</a>
-      <a href="#contact">联系</a>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-sprout" viewBox="0 0 24 24">
+      <path d="M12 21v-8" />
+      <path d="M12 13c0-3.3-2.2-6-5.5-6H4c0 3.4 2.3 6 5.5 6H12Z" />
+      <path d="M12 11c0-3.9 2.6-7 6.5-7H21c0 4-2.8 7-6.5 7H12Z" />
+    </symbol>
+    <symbol id="i-utensils" viewBox="0 0 24 24">
+      <path d="M7 3v6.5a2.5 2.5 0 0 0 5 0V3M9.5 12v9" />
+      <path d="M17 3c-1.7 1.8-2.5 4-2.5 6.5 0 1.7.7 2.8 2.5 3.2V21" />
+    </symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24">
+      <path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z" />
+      <path d="m18.5 15 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2L15.5 18l2.2-.8.8-2.2Z" />
+      <path d="m5.5 15 .6 1.6 1.6.6-1.6.6L5.5 20l-.6-1.6-1.6-.6 1.6-.6.6-1.6Z" />
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3c2.6 2.5 4 5.6 4 9s-1.4 6.5-4 9c-2.6-2.5-4-5.6-4-9s1.4-6.5 4-9Z" />
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 24 24">
+      <path d="M12 .8a11.2 11.2 0 0 0-3.5 21.8c.6.1.8-.2.8-.5v-2c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.4-1.3-5.4-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.4 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5A11.2 11.2 0 0 0 12 .8Z" />
+    </symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3.5 6.5 8.5 6 8.5-6" />
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24">
+      <path d="M7 17 17 7M9 7h8v8" />
+    </symbol>
+  </svg>
+
+  <header class="site-header">
+    <nav class="wrap nav" aria-label="主导航">
+      <a class="brand" href="#top" aria-label="TommyDeng，回到顶部">
+        <svg class="brand-icon" aria-hidden="true"><use href="#i-sprout"/></svg>
+        <span>TommyDeng</span>
+      </a>
+      <div class="nav-links">
+        <a href="#projects">近作</a>
+        <a href="#contact">联系</a>
+      </div>
     </nav>
   </header>
 
-  <main>
-    <section class="intro" aria-labelledby="name">
-      <div class="intro-copy">
-        <p class="kicker">HELLO, I'M</p>
-        <h1 id="name">TommyDeng</h1>
+  <main id="main">
+    <section class="hero wrap" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="kicker">Hello, I'm</p>
+        <h1 id="hero-title">TommyDeng</h1>
         <p class="tagline">农夫、艺术家</p>
         <p class="bio">暂时在家呆着，摸鱼到明天。</p>
       </div>
-      <div class="avatar-mount">
-        <img class="avatar" src="assets/avatar.jpg" width="176" height="132" alt="TommyDeng 的头像">
-      </div>
+      <figure class="portrait">
+        <img src="assets/avatar.jpg" alt="黄色小黄人护目镜造型的卡通头像" width="342" height="254">
+      </figure>
     </section>
 
-    <section class="block projects" id="projects" aria-labelledby="projects-title">
+    <section class="projects wrap" id="projects" aria-labelledby="projects-title">
       <div class="section-head">
-        <h2 id="projects-title">最近项目</h2>
-        <p class="section-en">RECENT PROJECTS</p>
+        <h2 class="section-title" id="projects-title">最近项目</h2>
+        <span class="section-eyebrow">Recent Projects</span>
       </div>
-      <div class="project-list">
-        <article class="project">
-          <div class="project-id">
-            <div class="emblem">
-              <img src="assets/utensils.svg" width="20" height="20" alt="">
-            </div>
-            <h3 class="title-zh">每日菜谱</h3>
-          </div>
-          <p class="desc">家庭共用的菜谱与「今天吃什么」小工具。</p>
-          <div class="status">
-            <p class="status-label">
-              <img src="assets/status-dot.svg" width="5" height="5" alt="">
-              <span>已上线，持续维护</span>
-            </p>
-          </div>
-          <a class="access" href="https://menu.tommydeng.org/" target="_blank" rel="noopener noreferrer">
-            <span class="access-top">
-              <span class="access-id">
-                <img src="assets/globe.svg" width="15" height="15" alt="">
-                <span>访问网站</span>
-              </span>
-              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+
+      <div class="project-grid">
+        <article class="project-card">
+          <div class="project-head">
+            <span class="project-icon" aria-hidden="true">
+              <svg><use href="#i-utensils"/></svg>
             </span>
-            <span class="access-url">https://menu.tommydeng.org/</span>
-          </a>
-          <a class="access" href="https://github.com/TommyDeng/daily-menu" target="_blank" rel="noopener noreferrer">
-            <span class="access-top">
-              <span class="access-id">
-                <img src="assets/github.svg" width="15" height="15" alt="">
-                <span>GitHub 仓库</span>
+            <h3 class="project-title">每日菜谱</h3>
+          </div>
+          <p class="project-desc">记录每日三餐与家庭菜谱的小工具。</p>
+          <p class="project-status"><span class="status-dot" aria-hidden="true"></span>已上线 · 持续维护中</p>
+
+          <div class="project-links">
+            <a class="access" href="https://menu.tommydeng.org/" target="_blank" rel="noopener noreferrer">
+              <span class="access-head">
+                <span class="access-name"><svg aria-hidden="true"><use href="#i-globe"/></svg>访问网站</span>
+                <svg class="access-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
               </span>
-              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
-            </span>
-            <span class="access-url">https://github.com/TommyDeng/daily-menu</span>
-          </a>
+              <span class="access-url">https://menu.tommydeng.org/</span>
+            </a>
+            <a class="access" href="https://github.com/TommyDeng/daily-menu" target="_blank" rel="noopener noreferrer">
+              <span class="access-head">
+                <span class="access-name"><svg class="icon-fill" aria-hidden="true"><use href="#i-github"/></svg>GitHub 仓库</span>
+                <svg class="access-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
+              </span>
+              <span class="access-url">https://github.com/TommyDeng/daily-menu</span>
+            </a>
+          </div>
         </article>
 
-        <article class="project">
-          <div class="project-id">
-            <div class="emblem">
-              <img src="assets/sparkles.svg" width="20" height="20" alt="">
-            </div>
-            <h3 class="title-en">Nova AI</h3>
-          </div>
-          <p class="desc">一个极简的自托管 LLM 聊天前端</p>
-          <div class="status">
-            <p class="status-label">
-              <img src="assets/status-dot.svg" width="5" height="5" alt="">
-              <span>已上线，持续维护</span>
-            </p>
-          </div>
-          <a class="access" href="https://ai.tommydeng.org/" target="_blank" rel="noopener noreferrer">
-            <span class="access-top">
-              <span class="access-id">
-                <img src="assets/globe.svg" width="15" height="15" alt="">
-                <span>访问网站</span>
-              </span>
-              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+        <article class="project-card">
+          <div class="project-head">
+            <span class="project-icon" aria-hidden="true">
+              <svg><use href="#i-sparkles"/></svg>
             </span>
-            <span class="access-url">https://ai.tommydeng.org/</span>
-          </a>
-          <a class="access" href="https://github.com/TommyDeng/simple-llm-api" target="_blank" rel="noopener noreferrer">
-            <span class="access-top">
-              <span class="access-id">
-                <img src="assets/github.svg" width="15" height="15" alt="">
-                <span>GitHub 仓库</span>
+            <h3 class="project-title">Nova AI</h3>
+          </div>
+          <p class="project-desc">一个极简的自托管 LLM 聊天前端。</p>
+          <p class="project-status"><span class="status-dot" aria-hidden="true"></span>已上线 · 持续维护</p>
+
+          <div class="project-links">
+            <a class="access" href="https://ai.tommydeng.org/" target="_blank" rel="noopener noreferrer">
+              <span class="access-head">
+                <span class="access-name"><svg aria-hidden="true"><use href="#i-globe"/></svg>访问网站</span>
+                <svg class="access-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
               </span>
-              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
-            </span>
-            <span class="access-url">https://github.com/TommyDeng/simple-llm-api</span>
-          </a>
+              <span class="access-url">https://ai.tommydeng.org/</span>
+            </a>
+            <a class="access" href="https://github.com/TommyDeng/simple-llm-api" target="_blank" rel="noopener noreferrer">
+              <span class="access-head">
+                <span class="access-name"><svg class="icon-fill" aria-hidden="true"><use href="#i-github"/></svg>GitHub 仓库</span>
+                <svg class="access-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
+              </span>
+              <span class="access-url">https://github.com/TommyDeng/simple-llm-api</span>
+            </a>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="block contact" id="contact" aria-labelledby="contact-title">
+    <section class="contact wrap" id="contact" aria-labelledby="contact-title">
       <div class="section-head">
-        <h2 id="contact-title">保持联系</h2>
-        <p class="section-en">SAY HELLO</p>
+        <h2 class="section-title" id="contact-title">保持联系</h2>
+        <span class="section-eyebrow">Say Hello</span>
       </div>
-      <div class="channel-list">
-        <a class="channel" href="mailto:reget@sohu.com">
-          <span class="channel-top">
-            <span class="channel-id">
-              <img src="assets/mail.svg" width="16" height="16" alt="">
-              <span>Email</span>
-            </span>
-            <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+
+      <div class="contact-grid">
+        <a class="contact-card" href="mailto:reget@sohu.com">
+          <span class="contact-top">
+            <span class="contact-label"><svg aria-hidden="true"><use href="#i-mail"/></svg>Email</span>
+            <svg class="contact-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
           </span>
-          <span class="channel-detail">reget@sohu.com</span>
+          <span class="contact-value">reget@sohu.com</span>
         </a>
-        <a class="channel" href="https://github.com/TommyDeng" target="_blank" rel="noopener noreferrer">
-          <span class="channel-top">
-            <span class="channel-id">
-              <img src="assets/github-contact.svg" width="16" height="16" alt="">
-              <span>GitHub</span>
-            </span>
-            <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+
+        <a class="contact-card" href="https://github.com/TommyDeng" target="_blank" rel="noopener noreferrer">
+          <span class="contact-top">
+            <span class="contact-label"><svg class="icon-fill" aria-hidden="true"><use href="#i-github"/></svg>GitHub</span>
+            <svg class="contact-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
           </span>
-          <span class="channel-detail">https://github.com/TommyDeng</span>
+          <span class="contact-value">https://github.com/TommyDeng</span>
         </a>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="rule"></div>
-    <div class="colophon">
-      <p>© 2026 TommyDeng</p>
-      <p class="closing">慢慢耕耘，自在生长。</p>
+    <div class="wrap footer-row">
+      <span>© 2026 TommyDeng</span>
+      <span>慢慢耕耘，自在生长。</span>
     </div>
   </footer>
-</div>
 </body>
 </html>
