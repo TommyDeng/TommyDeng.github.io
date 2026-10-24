@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TommyDeng</title>
+<meta name="description" content="我是一个快乐自由的农夫。暂时在家呆着，摸鱼到明天。">
+<meta name="theme-color" content="#f7f5ed">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f5ed;
+  --card: #fcfbf6;
+  --line: #dadfd0;
+  --ink: #293b2e;
+  --leaf: #4d6942;
+  --muted: #727a6c;
+  --emblem: #ecf0e3;
+  --track: #e1e6d7;
+  --sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "Noto Serif SC", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  --latin: "Lora", "Iowan Old Style", Palatino, "Palatino Linotype", serif;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p { margin: 0; }
+a { text-decoration: none; }
+img { border: 0; flex: none; }
+.skip {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  padding: 8px 12px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transform: translateY(-150%);
+}
+.skip:focus { transform: none; }
+
+.page {
+  width: min(1040px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.nav {
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--latin);
+  font-weight: 500;
+  font-size: 21px;
+  line-height: normal;
+  color: var(--ink);
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+.nav-links a {
+  color: var(--leaf);
+  font-size: 13px;
+  line-height: normal;
+}
+.nav-links a:hover { color: var(--ink); }
+
+.intro {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  padding: 64px 0;
+}
+.intro-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.kicker {
+  color: var(--leaf);
+  font-size: 10px;
+  line-height: 12px;
+}
+.intro h1 {
+  font-family: var(--latin);
+  font-weight: 400;
+  font-size: 60px;
+  line-height: 1.12;
+  color: var(--ink);
+}
+.tagline {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.bio {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.avatar-mount {
+  flex: none;
+  width: 192px;
+  height: 148px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 7px;
+}
+.avatar {
+  display: block;
+  width: 176px;
+  height: 132px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.projects { padding-bottom: 48px; }
+.contact { padding: 8px 0 16px; }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.section-head h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 34px;
+  color: var(--ink);
+}
+.section-en {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+#projects, #contact { scroll-margin-top: 24px; }
+
+.project-list, .channel-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  align-items: stretch;
+}
+.project {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.project-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.emblem {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--emblem);
+  border-radius: 8px;
+}
+.project h3 {
+  font-weight: 500;
+  font-size: 24px;
+  line-height: normal;
+  color: var(--ink);
+}
+.title-zh { font-family: var(--serif); }
+.title-en { font-family: var(--latin); }
+.desc {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.status {
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+.status.has-progress { gap: 12px; }
+.status-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--leaf);
+  font-size: 12px;
+  line-height: 14px;
+}
+.track {
+  width: 100%;
+  height: 4px;
+  background: var(--track);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.fill {
+  width: 65%;
+  height: 4px;
+  background: var(--leaf);
+  border-radius: 100px;
+}
+.access {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: inherit;
+}
+.access-top, .channel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.access-id, .channel-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--leaf);
+  line-height: normal;
+}
+.access-id { font-weight: 500; font-size: 13px; line-height: 16px; }
+.access-url, .channel-detail {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.access-url {
+  color: var(--muted);
+  font-size: 12px;
+}
+.access:hover .access-id { color: var(--ink); }
+
+.channel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: var(--emblem);
+  border-radius: 8px;
+  color: inherit;
+}
+.channel-id { font-size: 12px; line-height: 16px; }
+.channel-detail {
+  color: var(--ink);
+  font-size: 14px;
+}
+.channel:hover { background: #e4ead8; }
+
+.site-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0 30px;
+}
+.rule {
+  height: 1px;
+  background: var(--line);
+}
+.colophon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: normal;
+}
+.closing { font-family: var(--serif); }
+
+a:focus-visible {
+  outline: 2px solid var(--leaf);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (max-width: 899px) {
+  .page { width: calc(100% - 52px); }
+  .nav { height: 80px; }
+  .brand { font-size: 18px; }
+  .nav-links { gap: 24px; }
+  .intro {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 36px 0 44px;
+  }
+  .avatar-mount { order: -1; width: 109px; height: 88px; }
+  .avatar { width: 93px; height: 72px; }
+  .intro-copy { gap: 12px; }
+  .intro h1 { font-size: 42px; }
+  .tagline { font-size: 25px; }
+  .bio { font-size: 14px; }
+  .project-list, .channel-list {
+    grid-template-columns: 1fr;
+  }
+  .project-list { gap: 20px; }
+  .channel-list { gap: 12px; }
+  .project { padding: 20px; }
+  .site-footer { padding-bottom: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#projects">跳到近作</a>
+<div class="page">
+  <header class="nav">
+    <div class="brand">
+      <img src="assets/sprout.svg" width="22" height="22" alt="">
+      <span>TommyDeng</span>
+    </div>
+    <nav class="nav-links" aria-label="页面">
+      <a href="#projects">近作</a>
+      <a href="#contact">联系</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="name">
+      <div class="intro-copy">
+        <p class="kicker">HELLO, I'M</p>
+        <h1 id="name">TommyDeng</h1>
+        <p class="tagline">我是一个快乐自由的农夫</p>
+        <p class="bio">暂时在家呆着，摸鱼到明天。</p>
+      </div>
+      <div class="avatar-mount">
+        <img class="avatar" src="assets/avatar.jpg" width="176" height="132" alt="TommyDeng 的头像">
+      </div>
+    </section>
+
+    <section class="block projects" id="projects" aria-labelledby="projects-title">
+      <div class="section-head">
+        <h2 id="projects-title">最近项目</h2>
+        <p class="section-en">RECENT PROJECTS</p>
+      </div>
+      <div class="project-list">
+        <article class="project">
+          <div class="project-id">
+            <div class="emblem">
+              <img src="assets/utensils.svg" width="20" height="20" alt="">
+            </div>
+            <h3 class="title-zh">每日菜谱</h3>
+          </div>
+          <p class="desc">家庭共用的菜谱与「今天吃什么」小工具。</p>
+          <div class="status has-progress">
+            <p class="status-label">
+              <img src="assets/status-dot.svg" width="5" height="5" alt="">
+              <span>开发中 · 65%</span>
+            </p>
+            <div class="track" aria-hidden="true">
+              <div class="fill"></div>
+            </div>
+          </div>
+          <a class="access" href="https://menu.tommydeng.org/" target="_blank" rel="noopener noreferrer">
+            <span class="access-top">
+              <span class="access-id">
+                <img src="assets/globe.svg" width="15" height="15" alt="">
+                <span>访问网站</span>
+              </span>
+              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+            </span>
+            <span class="access-url">https://menu.tommydeng.org/</span>
+          </a>
+          <a class="access" href="https://github.com/TommyDeng/daily-menu" target="_blank" rel="noopener noreferrer">
+            <span class="access-top">
+              <span class="access-id">
+                <img src="assets/github.svg" width="15" height="15" alt="">
+                <span>GitHub 仓库</span>
+              </span>
+              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+            </span>
+            <span class="access-url">https://github.com/TommyDeng/daily-menu</span>
+          </a>
+        </article>
+
+        <article class="project">
+          <div class="project-id">
+            <div class="emblem">
+              <img src="assets/sparkles.svg" width="20" height="20" alt="">
+            </div>
+            <h3 class="title-en">Nova AI</h3>
+          </div>
+          <p class="desc">一个极简的自托管 LLM 聊天前端</p>
+          <div class="status">
+            <p class="status-label">
+              <img src="assets/status-dot.svg" width="5" height="5" alt="">
+              <span>已上线，持续维护</span>
+            </p>
+          </div>
+          <a class="access" href="https://ai.tommydeng.org/" target="_blank" rel="noopener noreferrer">
+            <span class="access-top">
+              <span class="access-id">
+                <img src="assets/globe.svg" width="15" height="15" alt="">
+                <span>访问网站</span>
+              </span>
+              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+            </span>
+            <span class="access-url">https://ai.tommydeng.org/</span>
+          </a>
+          <a class="access" href="https://github.com/TommyDeng/simple-llm-api" target="_blank" rel="noopener noreferrer">
+            <span class="access-top">
+              <span class="access-id">
+                <img src="assets/github.svg" width="15" height="15" alt="">
+                <span>GitHub 仓库</span>
+              </span>
+              <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+            </span>
+            <span class="access-url">https://github.com/TommyDeng/simple-llm-api</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <section class="block contact" id="contact" aria-labelledby="contact-title">
+      <div class="section-head">
+        <h2 id="contact-title">保持联系</h2>
+        <p class="section-en">SAY HELLO</p>
+      </div>
+      <div class="channel-list">
+        <a class="channel" href="mailto:reget@sohu.com">
+          <span class="channel-top">
+            <span class="channel-id">
+              <img src="assets/mail.svg" width="16" height="16" alt="">
+              <span>Email</span>
+            </span>
+            <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+          </span>
+          <span class="channel-detail">reget@sohu.com</span>
+        </a>
+        <a class="channel" href="https://github.com/TommyDeng" target="_blank" rel="noopener noreferrer">
+          <span class="channel-top">
+            <span class="channel-id">
+              <img src="assets/github-contact.svg" width="16" height="16" alt="">
+              <span>GitHub</span>
+            </span>
+            <img src="assets/arrow-up-right.svg" width="16" height="16" alt="">
+          </span>
+          <span class="channel-detail">https://github.com/TommyDeng</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="rule"></div>
+    <div class="colophon">
+      <p>© 2026 TommyDeng</p>
+      <p class="closing">慢慢耕耘，自在生长。</p>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
