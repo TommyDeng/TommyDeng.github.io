@@ -1,0 +1,29 @@
+{
+  "name": "tommydeng-home",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    },
+    "traces": {
+      "enabled": true
+    }
+  },
+  "assets": {
+    "directory": "."
+  },
+  "routes": [
+    {
+      "pattern": "tommydeng.org",
+      "custom_domain": true,
+      "previews_enabled": false
+    },
+    {
+      "pattern": "www.tommydeng.org",
+      "custom_domain": true,
+      "previews_enabled": false
+    }
+  ]
+}

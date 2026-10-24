@@ -1,6 +1,6 @@
 # TommyDeng.github.io
 
-个人主页 —— 一个快乐自由的农夫。
+个人主页 —— 农夫、艺术家。
 
 线上地址：<https://tommydeng.github.io/>
 
@@ -55,7 +55,6 @@ python3 -m http.server 8000
 | `--leaf` | `#4d6942` | 强调色 / 状态 / 链接 |
 | `--muted` | `#727a6c` | 次要文字 |
 | `--emblem` | `#ecf0e3` | 徽标与联系区块底色 |
-| `--track` | `#e1e6d7` | 进度条轨道 |
 
 版心宽度 `min(1040px, 100% - 48px)`，断点为 `max-width: 899px`（单列布局）。
 
@@ -82,7 +81,7 @@ git push origin main
 
 ## 当前项目
 
-- **每日菜谱** —— 家庭共用的菜谱与「今天吃什么」小工具 · 开发中 65%
+- **每日菜谱** —— 家庭共用的菜谱与「今天吃什么」小工具 · 已上线，持续维护
   <https://menu.tommydeng.org/>
 - **Nova AI** —— 一个极简的自托管 LLM 聊天前端 · 已上线
   <https://ai.tommydeng.org/>
