@@ -16,7 +16,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # secrets 不能直接写进 if 条件，先取到 env 再判断：
       # 未配置 token 时只告警，不会让每次 push 都失败。
